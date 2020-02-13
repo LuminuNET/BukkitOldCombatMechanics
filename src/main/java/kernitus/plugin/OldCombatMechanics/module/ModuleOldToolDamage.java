@@ -5,58 +5,45 @@ import kernitus.plugin.OldCombatMechanics.utilities.damage.DamageUtils;
 import kernitus.plugin.OldCombatMechanics.utilities.damage.OCMEntityDamageByEntityEvent;
 import kernitus.plugin.OldCombatMechanics.utilities.damage.WeaponDamages;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 
-import java.util.Locale;
+import java.util.EnumSet;
 
 /**
  * Restores old tool damage.
  */
 public class ModuleOldToolDamage extends Module {
 
-    private static final String[] WEAPONS = {"sword", "axe", "pickaxe", "spade", "hoe"};
+    private final EnumSet<Material> tools = EnumSet.of(Material.DIAMOND_SWORD, Material.GOLDEN_SWORD, Material.IRON_SWORD, Material.STONE_SWORD, Material.WOODEN_SWORD,
+            Material.DIAMOND_HOE, Material.GOLDEN_HOE, Material.IRON_HOE, Material.STONE_HOE, Material.WOODEN_HOE,
+            Material.DIAMOND_SHOVEL, Material.GOLDEN_SHOVEL, Material.IRON_SHOVEL, Material.STONE_SHOVEL, Material.WOODEN_SHOVEL,
+            Material.DIAMOND_PICKAXE, Material.GOLDEN_PICKAXE, Material.IRON_PICKAXE, Material.STONE_PICKAXE, Material.WOODEN_PICKAXE,
+            Material.DIAMOND_AXE, Material.GOLDEN_AXE, Material.IRON_AXE, Material.STONE_AXE, Material.WOODEN_AXE);
 
-    public ModuleOldToolDamage(OCMMain plugin){
+    public ModuleOldToolDamage(OCMMain plugin) {
         super(plugin, "old-tool-damage");
     }
 
+    @Override
+    public void reload() {
+        WeaponDamages.reload();
+    }
+
     @EventHandler(ignoreCancelled = true)
-    public void onEntityDamaged(OCMEntityDamageByEntityEvent event){
-        Entity damager = event.getDamager();
-
-        World world = damager.getWorld();
-
-        if(!isEnabled(world)) return;
-
+    public void onEntityDamaged(OCMEntityDamageByEntityEvent event) {
         Material weaponMaterial = event.getWeapon().getType();
 
-        if(!isTool(weaponMaterial)) return;
+        if (!tools.contains(weaponMaterial)) return;
 
         double weaponDamage = WeaponDamages.getDamage(weaponMaterial);
-        if(weaponDamage <= 0) weaponDamage = 1;
+        if (weaponDamage <= 0) weaponDamage = 1;
 
         double oldBaseDamage = event.getBaseDamage();
 
         event.setBaseDamage(weaponDamage);
-        debug("Old " + weaponMaterial + " damage: " + oldBaseDamage + " New tool damage: " + weaponDamage, damager);
 
         // Set sharpness to 1.8 damage value
         double newSharpnessDamage = DamageUtils.getOldSharpnessDamage(event.getSharpnessLevel());
-        debug("Old sharpness damage: " + event.getSharpnessDamage() + " New: " + newSharpnessDamage, damager);
         event.setSharpnessDamage(newSharpnessDamage);
-    }
-
-    private boolean isTool(Material material){
-        for(String type : WEAPONS)
-            if(isOfType(material, type))
-                return true;
-
-        return false;
-    }
-
-    private boolean isOfType(Material mat, String type){
-        return mat.toString().endsWith("_" + type.toUpperCase(Locale.ROOT));
     }
 }

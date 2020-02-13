@@ -2,7 +2,6 @@ package kernitus.plugin.OldCombatMechanics;
 
 import kernitus.plugin.OldCombatMechanics.module.Module;
 import kernitus.plugin.OldCombatMechanics.utilities.EventRegistry;
-import kernitus.plugin.OldCombatMechanics.utilities.Messenger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,33 +12,35 @@ import java.util.List;
 public class ModuleLoader {
 
     private static EventRegistry eventRegistry;
-    private static List<Module> modules = new ArrayList<>();
+    private static final List<Module> modules = new ArrayList<>();
 
-    public static void initialise(OCMMain plugin){
+    public static void initialise(OCMMain plugin) {
         ModuleLoader.eventRegistry = new EventRegistry(plugin);
     }
 
-    public static void toggleModules(){
-        modules.forEach(module -> setState(module, module.isEnabled()));
+    public static void toggleModules() {
+        for (Module module : modules) {
+            setState(module, module.isEnabled());
+        }
     }
 
-    private static void setState(Module module, boolean state){
-        if(state){
-            if(eventRegistry.registerListener(module)){
-                Messenger.debug("Enabled " + module.getClass().getSimpleName());
+    private static void setState(Module module, boolean state) {
+        if (state) {
+            if (eventRegistry.registerListener(module)) {
+                //Messenger.debug("Enabled " + module.getClass().getSimpleName());
             }
         } else {
-            if(eventRegistry.unregisterListener(module)){
-                Messenger.debug("Disabled " + module.getClass().getSimpleName());
+            if (eventRegistry.unregisterListener(module)) {
+                //Messenger.debug("Disabled " + module.getClass().getSimpleName());
             }
         }
     }
 
-    public static void addModule(Module module){
+    public static void addModule(Module module) {
         modules.add(module);
     }
 
-    public static List<Module> getModules(){
+    public static List<Module> getModules() {
         return modules;
     }
 }

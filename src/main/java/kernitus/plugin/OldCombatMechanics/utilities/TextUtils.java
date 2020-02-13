@@ -9,7 +9,7 @@ public class TextUtils {
      * @param text The text to colorize.
      * @return The colorized text.
      */
-    public static String colorize(String text){
+    public static String colorize(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
     }
 
@@ -19,7 +19,7 @@ public class TextUtils {
      * @param text The text to strip colors from.
      * @return The stripped text.
      */
-    public static String stripColor(String text){
+    public static String stripColor(String text) {
         return ChatColor.stripColor(text);
     }
 }

@@ -1,6 +1,5 @@
 package kernitus.plugin.OldCombatMechanics.utilities.damage;
 
-import kernitus.plugin.OldCombatMechanics.utilities.potions.PotionEffects;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -16,25 +15,24 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import static kernitus.plugin.OldCombatMechanics.utilities.Messenger.debug;
-
 public class OCMEntityDamageByEntityEvent extends Event implements Cancellable {
 
     private boolean cancelled;
     private static final HandlerList handlers = new HandlerList();
 
     @Override
-    public HandlerList getHandlers(){
+    public HandlerList getHandlers() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList(){
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    private Entity damager, damagee;
-    private DamageCause cause;
-    private double rawDamage;
+    private final Entity damager;
+    private final Entity damagee;
+    private final DamageCause cause;
+    private final double rawDamage;
 
     private ItemStack weapon;
     private int sharpnessLevel;
@@ -49,14 +47,14 @@ public class OCMEntityDamageByEntityEvent extends Event implements Cancellable {
     private boolean isStrengthModifierAddend = true;
     private boolean isWeaknessModifierMultiplier = false;
 
-    public OCMEntityDamageByEntityEvent(Entity damager, Entity damagee, DamageCause cause, double rawDamage){
+    public OCMEntityDamageByEntityEvent(Entity damager, Entity damagee, DamageCause cause, double rawDamage) {
 
         this.damager = damager;
         this.damagee = damagee;
         this.cause = cause;
         this.rawDamage = rawDamage;
 
-        if(!(damager instanceof LivingEntity)){
+        if (!(damager instanceof LivingEntity)) {
             setCancelled(true);
             return;
         }
@@ -66,162 +64,149 @@ public class OCMEntityDamageByEntityEvent extends Event implements Cancellable {
         EntityEquipment equipment = le.getEquipment();
         weapon = equipment.getItemInMainHand();
         // Yay paper. Why do you need to return null here?
-        if(weapon == null){
+        if (weapon == null) {
             weapon = new ItemStack(Material.AIR);
         }
 
         EntityType entity = damagee.getType();
-
-        debug(le, "Raw damage: " + rawDamage);
 
         mobEnchantmentsDamage = MobDamage.applyEntityBasedDamage(entity, weapon, rawDamage) - rawDamage;
 
         sharpnessLevel = weapon.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
         sharpnessDamage = DamageUtils.getNewSharpnessDamage(sharpnessLevel);
 
-        debug(le, "Mob: " + mobEnchantmentsDamage + " Sharpness: " + sharpnessDamage);
-
         //Amount of damage including potion effects and critical hits
         double tempDamage = rawDamage - mobEnchantmentsDamage - sharpnessDamage;
 
-        debug(le, "No ench damage: " + tempDamage);
-
         //Check if it's a critical hit
-        if(le instanceof Player){
+        if (le instanceof Player) {
             Player player = (Player) le;
-            if(DamageUtils.isCriticalHit(player)){
+            if (DamageUtils.isCriticalHit(player)) {
                 criticalMultiplier = 1.5;
                 tempDamage /= 1.5;
-                debug(player, "Critical hit detected");
             }
         }
 
         //amplifier 0 = Strength I    amplifier 1 = Strength II
-        int amplifier = PotionEffects.get(le, PotionEffectType.INCREASE_DAMAGE)
-                .map(PotionEffect::getAmplifier)
-                .orElse(-1);
+        final PotionEffect potionEffect = le.getPotionEffect(PotionEffectType.INCREASE_DAMAGE);
+        int amplifier = potionEffect != null ? potionEffect.getAmplifier() : -1;
 
         strengthLevel = ++amplifier;
 
         strengthModifier = strengthLevel * 3;
 
-        debug(le, "Strength Modifier: " + strengthModifier);
-
-        if(le.hasPotionEffect(PotionEffectType.WEAKNESS)) weaknessModifier = -4;
-
-        debug(le, "Weakness Modifier: " + weaknessModifier);
+        if (le.hasPotionEffect(PotionEffectType.WEAKNESS)) weaknessModifier = -4;
 
         baseDamage = tempDamage + weaknessModifier - strengthModifier;
-        debug(le, "Base tool damage: " + baseDamage);
     }
 
-    public Entity getDamager(){
+    public Entity getDamager() {
         return damager;
     }
 
-    public Entity getDamagee(){
+    public Entity getDamagee() {
         return damagee;
     }
 
-    public DamageCause getCause(){
+    public DamageCause getCause() {
         return cause;
     }
 
-    public double getRawDamage(){
+    public double getRawDamage() {
         return rawDamage;
     }
 
-    public ItemStack getWeapon(){
+    public ItemStack getWeapon() {
         return weapon;
     }
 
-    public int getSharpnessLevel(){
+    public int getSharpnessLevel() {
         return sharpnessLevel;
     }
 
-    public double getStrengthModifier(){
+    public double getStrengthModifier() {
         return strengthModifier;
     }
 
-    public void setStrengthModifier(double strengthModifier){
+    public void setStrengthModifier(double strengthModifier) {
         this.strengthModifier = strengthModifier;
     }
 
-    public int getStrengthLevel(){
+    public int getStrengthLevel() {
         return strengthLevel;
     }
 
-    public double getWeaknessModifier(){
+    public double getWeaknessModifier() {
         return weaknessModifier;
     }
 
-    public void setWeaknessModifier(double weaknessModifier){
+    public void setWeaknessModifier(double weaknessModifier) {
         this.weaknessModifier = weaknessModifier;
     }
 
-    public boolean isStrengthModifierMultiplier(){
+    public boolean isStrengthModifierMultiplier() {
         return isStrengthModifierMultiplier;
     }
 
-    public void setIsStrengthModifierMultiplier(boolean isStrengthModifierMultiplier){
+    public void setIsStrengthModifierMultiplier(boolean isStrengthModifierMultiplier) {
         this.isStrengthModifierMultiplier = isStrengthModifierMultiplier;
     }
 
-    public void setIsStrengthModifierAddend(boolean isStrengthModifierAddend){
+    public void setIsStrengthModifierAddend(boolean isStrengthModifierAddend) {
         this.isStrengthModifierAddend = isStrengthModifierAddend;
     }
 
-    public boolean isWeaknessModifierMultiplier(){
+    public boolean isWeaknessModifierMultiplier() {
         return isWeaknessModifierMultiplier;
     }
 
-    public void setIsWeaknessModifierMultiplier(boolean weaknessModifierMultiplier){
+    public void setIsWeaknessModifierMultiplier(boolean weaknessModifierMultiplier) {
         isWeaknessModifierMultiplier = weaknessModifierMultiplier;
     }
 
-    public boolean isStrengthModifierAddend(){
+    public boolean isStrengthModifierAddend() {
         return isStrengthModifierAddend;
     }
 
-    public double getBaseDamage(){
+    public double getBaseDamage() {
         return baseDamage;
     }
 
-    public void setBaseDamage(double baseDamage){
+    public void setBaseDamage(double baseDamage) {
         this.baseDamage = baseDamage;
     }
 
-    public double getMobEnchantmentsDamage(){
+    public double getMobEnchantmentsDamage() {
         return mobEnchantmentsDamage;
     }
 
-    public void setMobEnchantmentsDamage(double mobEnchantmentsDamage){
+    public void setMobEnchantmentsDamage(double mobEnchantmentsDamage) {
         this.mobEnchantmentsDamage = mobEnchantmentsDamage;
     }
 
-    public double getSharpnessDamage(){
+    public double getSharpnessDamage() {
         return sharpnessDamage;
     }
 
-    public void setSharpnessDamage(double sharpnessDamage){
+    public void setSharpnessDamage(double sharpnessDamage) {
         this.sharpnessDamage = sharpnessDamage;
     }
 
-    public double getCriticalMultiplier(){
+    public double getCriticalMultiplier() {
         return criticalMultiplier;
     }
 
-    public void setCriticalMultiplier(double criticalMultiplier){
+    public void setCriticalMultiplier(double criticalMultiplier) {
         this.criticalMultiplier = criticalMultiplier;
     }
 
     @Override
-    public boolean isCancelled(){
+    public boolean isCancelled() {
         return cancelled;
     }
 
     @Override
-    public void setCancelled(boolean cancelled){
+    public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
 }

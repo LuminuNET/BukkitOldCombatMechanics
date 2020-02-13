@@ -1,5 +1,7 @@
 package kernitus.plugin.OldCombatMechanics.utilities.damage;
 
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import kernitus.plugin.OldCombatMechanics.OCMMain;
 import kernitus.plugin.OldCombatMechanics.utilities.ConfigUtils;
 import org.bukkit.Material;
@@ -9,24 +11,25 @@ import java.util.Map;
 
 public class WeaponDamages {
 
-    private static Map<String, Double> damages;
+    private static Object2DoubleMap<Material> damages;
 
-    private static OCMMain plugin;
+    public static void reload() {
+        ConfigurationSection section = OCMMain.getInstance().getConfig().getConfigurationSection("old-tool-damage.damages");
 
-    public static void initialise(OCMMain plugin){
-        WeaponDamages.plugin = plugin;
-        reload();
+        final Map<String, Double> damages = ConfigUtils.loadDoubleMap(section);
+        WeaponDamages.damages = new Object2DoubleOpenHashMap<>();
+        for (Map.Entry<String, Double> entry : damages.entrySet()) {
+            final Material material = Material.getMaterial(entry.getKey().toUpperCase());
+            if (material == null) {
+                OCMMain.getInstance().getLogger().warning("Unknown material in damages list: " + entry.getKey());
+                continue;
+            }
+            WeaponDamages.damages.put(material, (double) entry.getValue());
+        }
     }
 
-    private static void reload(){
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("old-tool-damage.damages");
-
-        damages = ConfigUtils.loadDoubleMap(section);
-    }
-
-    public static double getDamage(Material mat){
+    public static double getDamage(Material mat) {
         //Replace 1.14 material names to ones used in config.yml
-        String name = mat.name().replace("GOLDEN", "GOLD").replace("WOODEN", "WOOD");
-        return damages.getOrDefault(name, -1.0);
+        return damages.getOrDefault(mat, 1);
     }
 }

@@ -3,30 +3,6 @@ name: OldCombatMechanics
 version: ${project.version}
 authors: [kernitus, Rayzr522]
 description: Reverts to pre-1.9 combat mechanics
-website: https://github.com/kernitus/BukkitOldCombatMechanics
+website: https://github.com/LuminuNET/BukkitOldCombatMechanics
 load: POSTWORLD
-softdepend: [PlaceholderAPI, Spartan]
 api-version: 1.13
-
-commands:
-  OldCombatMechanics:
-   description: OldCombatMechanics's main command
-   aliases: [ocm]
-   permission: OldCombatMechanics.commands
-   
-permissions:
-  OldCombatMechanics.*:
-    description: Gives access to all OCM permissions
-    default: op
-    children:
-      OldCombatMechanics.commands: true
-      OldCombatMechanics.notify: true
-  OldCombatMechanics.commands:
-    description: Allows the usage of OCM commands
-    default: op
-  OldCombatMechanics.notify:
-    description: Notifies of new OCM updates
-    default: op
-  OldCombatMechanics.nolapis:
-    description: Allows lapis to be auto-place in enchantment tables
-    default: op

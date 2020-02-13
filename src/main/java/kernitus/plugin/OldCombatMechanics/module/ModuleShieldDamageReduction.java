@@ -16,13 +16,13 @@ public class ModuleShieldDamageReduction extends Module {
 
     private String genericDamageReduction, projectileDamageReduction;
 
-    public ModuleShieldDamageReduction(OCMMain plugin){
+    public ModuleShieldDamageReduction(OCMMain plugin) {
         super(plugin, "shield-damage-reduction");
 
     }
 
     @Override
-    public void reload(){
+    public void reload() {
         genericDamageReduction = module()
                 .getString("genericDamageReduction", "50%")
                 .replaceAll(" ", "");
@@ -34,14 +34,14 @@ public class ModuleShieldDamageReduction extends Module {
 
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onHit(EntityDamageByEntityEvent e){
+    public void onHit(EntityDamageByEntityEvent e) {
         Entity entity = e.getEntity();
 
-        if(!(entity instanceof Player)) return;
+        if (!(entity instanceof Player)) return;
 
         Player player = (Player) entity;
 
-        if(!shieldBlockedDamage(e)) return;
+        if (!shieldBlockedDamage(e)) return;
 
         // Instead of reducing damage to 33% apply config reduction
 
@@ -50,34 +50,32 @@ public class ModuleShieldDamageReduction extends Module {
         //Also make sure reducing the damage doesn't result in negative damage
         e.setDamage(DamageModifier.BLOCKING, 0);
 
-        if(e.getFinalDamage() >= reducedDamage)
+        if (e.getFinalDamage() >= reducedDamage)
             e.setDamage(DamageModifier.BLOCKING, -reducedDamage);
-
-        debug("Damage reduced by: " + e.getDamage(DamageModifier.BLOCKING), player);
     }
 
-    private double getReducedDamage(double fullDamage, DamageCause damageCause){
+    private double getReducedDamage(double fullDamage, DamageCause damageCause) {
         String damageReductionString = damageCause == DamageCause.PROJECTILE
                 ? projectileDamageReduction
                 : genericDamageReduction;
 
-        if(damageReductionString.matches("\\d{1,3}%")){
+        if (damageReductionString.matches("\\d{1,3}%")) {
             // Reduce damage by percentage
             int percentage = Integer.parseInt(damageReductionString.replace("%", ""));
             fullDamage = (fullDamage - 1) * percentage / 100;
-        } else if(damageReductionString.matches("\\d+")){
+        } else if (damageReductionString.matches("\\d+")) {
             // Reduce by specified amount of half-hearts
             fullDamage = Integer.parseInt(damageReductionString);
         } else {
             fullDamage = 0;
         }
 
-        if(fullDamage < 0)
+        if (fullDamage < 0)
             fullDamage = 0;
         return fullDamage;
     }
 
-    private boolean shieldBlockedDamage(EntityDamageByEntityEvent e){
+    private boolean shieldBlockedDamage(EntityDamageByEntityEvent e) {
         // Only reduce damage if they were hit head on, i.e. the shield blocked some of the damage
         return e.getDamage(DamageModifier.BLOCKING) < 0;
     }

@@ -6,28 +6,40 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
-import java.util.Locale;
-
 /**
  * Adds knockback to eggs, snowballs and ender pearls.
  */
 public class ModuleProjectileKnockback extends Module {
 
-    public ModuleProjectileKnockback(OCMMain plugin){
+    private double snowballDamage;
+    private double eggDamage;
+    private double enderpearlDamage;
+
+    public ModuleProjectileKnockback(OCMMain plugin) {
         super(plugin, "projectile-knockback");
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onEntityHit(EntityDamageByEntityEvent e){
-        if(!isEnabled(e.getEntity().getWorld())) return;
+    @Override
+    public void reload() {
+        snowballDamage = module().getDouble("damage.snowball");
+        eggDamage = module().getDouble("damage.egg");
+        enderpearlDamage = module().getDouble("damage.ender_pearl");
+    }
 
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEntityHit(EntityDamageByEntityEvent e) {
         EntityType type = e.getDamager().getType();
 
-        switch(type){
+        switch (type) {
             case SNOWBALL:
+                e.setDamage(snowballDamage);
+                break;
             case EGG:
+                e.setDamage(eggDamage);
+                break;
             case ENDER_PEARL:
-                e.setDamage(module().getDouble("damage." + type.toString().toLowerCase(Locale.ROOT)));
+                e.setDamage(enderpearlDamage);
+                break;
             default:
                 break;
         }

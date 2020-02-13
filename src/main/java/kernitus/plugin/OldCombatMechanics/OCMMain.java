@@ -1,14 +1,11 @@
 package kernitus.plugin.OldCombatMechanics;
 
-import kernitus.plugin.OldCombatMechanics.hooks.PlaceholderAPIHook;
-import kernitus.plugin.OldCombatMechanics.hooks.api.Hook;
 import kernitus.plugin.OldCombatMechanics.module.*;
-import kernitus.plugin.OldCombatMechanics.updater.ModuleUpdateChecker;
 import kernitus.plugin.OldCombatMechanics.utilities.Config;
 import kernitus.plugin.OldCombatMechanics.utilities.Messenger;
 import kernitus.plugin.OldCombatMechanics.utilities.damage.EntityDamageByEntityListener;
-import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventException;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -16,7 +13,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,22 +22,21 @@ import java.util.stream.Collectors;
 public class OCMMain extends JavaPlugin {
 
     private static OCMMain INSTANCE;
-    private Logger logger = getLogger();
-    private OCMConfigHandler CH = new OCMConfigHandler(this);
-    private List<Runnable> disableListeners = new ArrayList<>();
-    private List<Runnable> enableListeners = new ArrayList<>();
-    private List<Hook> hooks = new ArrayList<>();
+    private final Logger logger = getLogger();
+    private final OCMConfigHandler CH = new OCMConfigHandler(this);
+    private final List<Runnable> disableListeners = new ArrayList<>();
+    private final List<Runnable> enableListeners = new ArrayList<>();
 
-    public static OCMMain getInstance(){
+    public static OCMMain getInstance() {
         return INSTANCE;
     }
 
-    public static String getVersion(){
+    public static String getVersion() {
         return INSTANCE.getDescription().getVersion();
     }
 
     @Override
-    public void onEnable(){
+    public void onEnable() {
         INSTANCE = this;
 
         PluginDescriptionFile pdfFile = this.getDescription();
@@ -55,81 +50,47 @@ public class OCMMain extends JavaPlugin {
         // Register all the modules
         registerModules();
 
-        // Register all hooks for integrating with other plugins
-        registerHooks();
-
-        // Initialize all the hooks
-        hooks.forEach(hook -> hook.init(this));
-
-        // Set up the command handler
-        getCommand("OldCombatMechanics").setExecutor(new OCMCommandHandler(this, this.getFile()));
-
         // Initialise the Messenger utility
         Messenger.initialise(this);
 
         // Initialise Config utility
         Config.initialise(this);
 
-        // MCStats Metrics
-        try{
-            MetricsLite metrics = new MetricsLite(this);
-            metrics.start();
-        } catch(IOException e){
-            // Failed to submit the stats
+        for (Runnable enableListener : enableListeners) {
+            enableListener.run();
         }
-
-        //BStats Metrics
-        Metrics metrics = new Metrics(this);
-
-
-        /*Custom bar charts currently disabled on bStats
-        metrics.addCustomChart(
-                new Metrics.SimpleBarChart(
-                        "enabled_modules",
-                        () -> ModuleLoader.getModules().stream()
-                                .filter(Module::isEnabled)
-                                .collect(Collectors.toMap(Module::toString, module -> 1))
-                )
-        );*/
-
-        // Custom Advanced Pie Chart:
-        metrics.addCustomChart(new Metrics.AdvancedPie("most_used_modules",
-                () -> ModuleLoader.getModules().stream()
-                    .filter(Module::isEnabled)
-                    .collect(Collectors.toMap(Module::toString, module -> 1))
-        ));
-
-        enableListeners.forEach(Runnable::run);
 
         // Properly handle Plugman load/unload.
         List<RegisteredListener> joinListeners = Arrays.stream(PlayerJoinEvent.getHandlerList().getRegisteredListeners())
                 .filter(registeredListener -> registeredListener.getPlugin().equals(this))
                 .collect(Collectors.toList());
 
-        Bukkit.getOnlinePlayers().forEach(player -> {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerJoinEvent event = new PlayerJoinEvent(player, "");
 
             // Trick all the modules into thinking the player just joined in case the plugin was loaded with Plugman.
             // This way attack speeds, item modifications, etc. will be applied immediately instead of after a re-log.
-            joinListeners.forEach(registeredListener -> {
-                try{
+            for (RegisteredListener registeredListener : joinListeners) {
+                try {
                     registeredListener.callEvent(event);
-                } catch(EventException e){
+                } catch (EventException e) {
                     e.printStackTrace();
                 }
-            });
-        });
+            }
+        }
 
         // Logging to console the enabling of OCM
         logger.info(pdfFile.getName() + " v" + pdfFile.getVersion() + " has been enabled");
     }
 
     @Override
-    public void onDisable(){
+    public void onDisable() {
 
         PluginDescriptionFile pdfFile = this.getDescription();
 
-        disableListeners.forEach(Runnable::run);
+        for (Runnable disableListener : disableListeners) {
+            disableListener.run();
+        }
 
         // Properly handle Plugman load/unload.
         List<RegisteredListener> quitListeners = Arrays.stream(PlayerQuitEvent.getHandlerList().getRegisteredListeners())
@@ -138,36 +99,30 @@ public class OCMMain extends JavaPlugin {
 
         // Trick all the modules into thinking the player just quit in case the plugin was unloaded with Plugman.
         // This way attack speeds, item modifications, etc. will be restored immediately instead of after a disconnect.
-        Bukkit.getOnlinePlayers().forEach(player -> {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerQuitEvent event = new PlayerQuitEvent(player, "");
 
-            quitListeners.forEach(registeredListener -> {
-                try{
+            for (RegisteredListener registeredListener : quitListeners) {
+                try {
                     registeredListener.callEvent(event);
-                } catch(EventException e){
+                } catch (EventException e) {
                     e.printStackTrace();
                 }
-            });
-        });
+            }
+        }
 
         // Logging to console the disabling of OCM
         logger.info(pdfFile.getName() + " v" + pdfFile.getVersion() + " has been disabled");
     }
 
-    private void registerModules(){
-        // Update Checker (also a module so we can use the dynamic registering/unregistering)
-        ModuleLoader.addModule(new ModuleUpdateChecker(this, this.getFile()));
-
+    private void registerModules() {
         // Module listeners
         ModuleLoader.addModule(new ModuleAttackCooldown(this));
-        ModuleLoader.addModule(new ModulePlayerCollisions(this));
 
         //Listeners registered after with same priority appear to be called later
 
         //These three listen to OCMEntityDamageByEntityEvent:
         ModuleLoader.addModule(new ModuleOldToolDamage(this));
-        ModuleLoader.addModule(new ModuleSwordSweep(this));
-        ModuleLoader.addModule(new ModuleOldPotionEffects(this));
 
         //Next block are all on LOWEST priority, so will be called in the following order:
         //Damage order: base -> potion effects -> critical hit -> enchantments -> blocking -> armour effects
@@ -178,34 +133,24 @@ public class OCMMain extends JavaPlugin {
         //Then OldArmourStrength to recalculate armour defense accordingly
         ModuleLoader.addModule(new ModuleOldArmourStrength(this));
 
+        ModuleLoader.addModule(new ModuleSwordSweep(this));
         ModuleLoader.addModule(new ModuleSwordBlocking(this));
         ModuleLoader.addModule(new ModuleGoldenApple(this));
         ModuleLoader.addModule(new ModuleFishingKnockback(this));
         ModuleLoader.addModule(new ModulePlayerRegen(this));
 
         ModuleLoader.addModule(new ModuleDisableCrafting(this));
-        ModuleLoader.addModule(new ModuleDisableOffHand(this));
-        ModuleLoader.addModule(new ModuleOldBrewingStand(this));
-        ModuleLoader.addModule(new ModuleDisableElytra(this));
-        ModuleLoader.addModule(new ModuleDisableProjectileRandomness(this));
         ModuleLoader.addModule(new ModuleDisableBowBoost(this));
         ModuleLoader.addModule(new ModuleProjectileKnockback(this));
         ModuleLoader.addModule(new ModuleNoLapisEnchantments(this));
-        ModuleLoader.addModule(new ModuleDisableEnderpearlCooldown(this));
-        ModuleLoader.addModule(new ModuleChorusFruit(this));
+        //ModuleLoader.addModule(new ModuleDisableEnderpearlCooldown(this));
     }
 
-    private void registerHooks(){
-        if(getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")){
-            hooks.add(new PlaceholderAPIHook());
-        }
-    }
-
-    public void upgradeConfig(){
+    public void upgradeConfig() {
         CH.upgradeConfig();
     }
 
-    public boolean doesConfigExist(){
+    public boolean doesConfigExist() {
         return CH.doesConfigExist();
     }
 
@@ -214,7 +159,7 @@ public class OCMMain extends JavaPlugin {
      *
      * @param action the {@link Runnable} to run when the plugin gets disabled
      */
-    public void addDisableListener(Runnable action){
+    public void addDisableListener(Runnable action) {
         disableListeners.add(action);
     }
 
@@ -223,7 +168,7 @@ public class OCMMain extends JavaPlugin {
      *
      * @param action the {@link Runnable} to run when the plugin gets enabled
      */
-    public void addEnableListener(Runnable action){
+    public void addEnableListener(Runnable action) {
         enableListeners.add(action);
     }
 }

@@ -1,7 +1,6 @@
 package kernitus.plugin.OldCombatMechanics.module;
 
 import kernitus.plugin.OldCombatMechanics.OCMMain;
-import kernitus.plugin.OldCombatMechanics.utilities.reflection.Reflector;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
@@ -27,7 +26,7 @@ public class ModuleOldArmourStrength extends Module {
 
     private static final double REDUCTION_PER_ARMOUR_POINT = 0.04;
 
-    private static final Set<EntityDamageEvent.DamageCause> NON_REDUCED_CAUSES = EnumSet.of(
+    private static final EnumSet<EntityDamageEvent.DamageCause> NON_REDUCED_CAUSES = EnumSet.of(
             EntityDamageEvent.DamageCause.FIRE_TICK,
             EntityDamageEvent.DamageCause.VOID,
             EntityDamageEvent.DamageCause.SUFFOCATION,
@@ -42,7 +41,7 @@ public class ModuleOldArmourStrength extends Module {
         super(plugin, "old-armour-strength");
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityDamage(EntityDamageEvent e) {
         if (!(e.getEntity() instanceof LivingEntity)) return;
 
@@ -72,10 +71,6 @@ public class ModuleOldArmourStrength extends Module {
             e.setDamage(EntityDamageEvent.DamageModifier.MAGIC,
                     -e.getFinalDamage() * enchantmentReductionPercentage);
         }
-
-        debug(String.format("Reductions: Armour %.0f, Ench %.0f, Total %.2f, Final Damage: %.2f", reductionPercentage * 100,
-                enchantmentReductionPercentage * 100, (reductionPercentage + (1 - reductionPercentage) * enchantmentReductionPercentage) * 100,
-                e.getFinalDamage()));
     }
 
     private double calculateEnchantmentReductionPercentage(EntityEquipment equipment, EntityDamageEvent.DamageCause cause) {
@@ -117,9 +112,7 @@ public class ModuleOldArmourStrength extends Module {
                     EntityDamageEvent.DamageCause.LAVA
             );
 
-            if (Reflector.versionIsNewerOrEqualAs(1, 10, 0)) {
-                damageCauses.add(EntityDamageEvent.DamageCause.HOT_FLOOR);
-            }
+            damageCauses.add(EntityDamageEvent.DamageCause.HOT_FLOOR);
 
             return damageCauses;
         }, 1.25, Enchantment.PROTECTION_FIRE),
@@ -134,9 +127,9 @@ public class ModuleOldArmourStrength extends Module {
                 EntityDamageEvent.DamageCause.FALL
         ), 2.5, Enchantment.PROTECTION_FALL);
 
-        private Set<EntityDamageEvent.DamageCause> protection;
-        private double typeModifier;
-        private Enchantment enchantment;
+        private final Set<EntityDamageEvent.DamageCause> protection;
+        private final double typeModifier;
+        private final Enchantment enchantment;
 
         EnchantmentType(Supplier<Set<EntityDamageEvent.DamageCause>> protection, double typeModifier, Enchantment enchantment) {
             this.protection = protection.get();
