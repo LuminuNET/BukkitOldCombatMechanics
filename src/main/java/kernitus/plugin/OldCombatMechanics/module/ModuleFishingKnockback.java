@@ -69,10 +69,10 @@ public class ModuleFishingKnockback extends Module {
 
         EntityDamageEvent event = makeEvent(rodder, player, damage);
         Bukkit.getPluginManager().callEvent(event);
-
-        player.damage(damage);
-
-        player.setVelocity(calculateKnockbackVelocity(player.getVelocity(), player.getLocation(), hook.getLocation()));
+        if (!event.isCancelled()) {
+            player.damage(damage);
+            player.setVelocity(calculateKnockbackVelocity(player.getVelocity(), player.getLocation(), hook.getLocation()));
+        }
     }
 
     private Vector calculateKnockbackVelocity(Vector currentVelocity, Location player, Location hook) {
@@ -119,15 +119,16 @@ public class ModuleFishingKnockback extends Module {
     }
 
     private EntityDamageEvent makeEvent(Player rodder, Player player, double damage) {
-        if (useEntityDamageEvent)
+        if (useEntityDamageEvent) {
             return new EntityDamageEvent(player,
                     EntityDamageEvent.DamageCause.PROJECTILE,
                     new EnumMap<>(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage)),
                     new EnumMap<>(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(damage))));
-        else
+        } else {
             return new EntityDamageByEntityEvent(rodder, player,
                     EntityDamageEvent.DamageCause.PROJECTILE,
                     new EnumMap<>(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage)),
                     new EnumMap<>(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(damage))));
+        }
     }
 }
