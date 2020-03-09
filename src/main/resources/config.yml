@@ -28,45 +28,6 @@ disable-enderpearl-cooldown:
   # Disables enderpearl cooldown
   enabled: false
 
-old-tool-damage:
-  # This is to set the tool damage as in pre-1.9
-  # IMPORTANT: Also enable disable-sword-sweep module or sweeps will have the damage value of the weapon in hand
-  # NOTE: this will modify the damage, however on the item tooltip it will still show the 1.9+ damage
-  enabled: true
-  # Damage values shown in 1.9 representation (actual damage)
-  # In 1.8 the damage tooltip value would be added to 1 'base damage', yielding the values below
-  damages:
-    # Axe damages
-    GOLDEN_AXE: 4
-    WOODEN_AXE: 4
-    STONE_AXE: 5
-    IRON_AXE: 6
-    DIAMOND_AXE: 7
-    # Shovel damages
-    GOLDEN_SHOVEL: 2
-    WOODEN_SHOVEL: 2
-    STONE_SHOVEL: 3
-    IRON_SHOVEL: 4
-    DIAMOND_SHOVEL: 5
-    # Sword damages
-    GOLDEN_SWORD: 5
-    WOODEN_SWORD: 5
-    STONE_SWORD: 6
-    IRON_SWORD: 7
-    DIAMOND_SWORD: 8
-    # Pickaxe damages
-    GOLDEN_PICKAXE: 3
-    WOODEN_PICKAXE: 3
-    STONE_PICKAXE: 4
-    IRON_PICKAXE: 5
-    DIAMOND_PICKAXE: 6
-    # Hoe damages
-    GOLDEN_HOE: 1
-    WOODEN_HOE: 1
-    STONE_HOE: 1
-    IRON_HOE: 1
-    DIAMOND_HOE: 1
-
 sword-blocking:
   # This is to allow players to block with swords again, by getting a shield while they hold right click with a sword
   enabled: true
@@ -162,11 +123,6 @@ old-player-regen:
   # If, after adding this, Minecraft finds the value is above 4, it subtracts 4
   # and either reduces saturation or, if saturation is 0, reduces food level by 1 (1/2 a stick)
   exhaustion: 3
-
-old-armour-strength:
-  # This is to make armour calculations like in 1.8
-  # Based on this: https://minecraft.gamepedia.com/index.php?title=Armor&oldid=909187
-  enabled: true
 
 disable-bow-boost:
   # This is to stop players from boosting themselves forward by hitting themselves

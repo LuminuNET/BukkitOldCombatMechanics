@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import kernitus.plugin.OldCombatMechanics.ModuleLoader;
 import kernitus.plugin.OldCombatMechanics.OCMMain;
 import kernitus.plugin.OldCombatMechanics.module.Module;
-import kernitus.plugin.OldCombatMechanics.utilities.damage.EntityDamageByEntityListener;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -80,9 +79,6 @@ public class Config {
                         .log(Level.WARNING, "Error reloading module '" + module.toString() + "'", e);
             }
         }
-
-        //Set EntityDamagedByEntityListener to enabled if either of these modules is enabled
-        EntityDamageByEntityListener.setEnabledStatic(moduleEnabled("old-tool-damage"));
 
         // Dynamically registers / unregisters all event listeners for optimal performance!
         ModuleLoader.toggleModules();

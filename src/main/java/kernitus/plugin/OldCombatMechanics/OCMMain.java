@@ -3,7 +3,6 @@ package kernitus.plugin.OldCombatMechanics;
 import kernitus.plugin.OldCombatMechanics.module.*;
 import kernitus.plugin.OldCombatMechanics.utilities.Config;
 import kernitus.plugin.OldCombatMechanics.utilities.Messenger;
-import kernitus.plugin.OldCombatMechanics.utilities.damage.EntityDamageByEntityListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventException;
@@ -121,19 +120,9 @@ public class OCMMain extends JavaPlugin {
 
         //Listeners registered after with same priority appear to be called later
 
-        //These three listen to OCMEntityDamageByEntityEvent:
-        ModuleLoader.addModule(new ModuleOldToolDamage(this));
-
-        //Next block are all on LOWEST priority, so will be called in the following order:
-        //Damage order: base -> potion effects -> critical hit -> enchantments -> blocking -> armour effects
-        //EntityDamageByEntityListener calls OCMEntityDamageByEntityEvent, see modules above
-        ModuleLoader.addModule(new EntityDamageByEntityListener(this));
         //Then ModuleSwordBlocking to calculate blocking
         ModuleLoader.addModule(new ModuleShieldDamageReduction(this));
-        //Then OldArmourStrength to recalculate armour defense accordingly
-        ModuleLoader.addModule(new ModuleOldArmourStrength(this));
 
-        ModuleLoader.addModule(new ModuleSwordSweep(this));
         ModuleLoader.addModule(new ModuleSwordBlocking(this));
         ModuleLoader.addModule(new ModuleGoldenApple(this));
         ModuleLoader.addModule(new ModuleFishingKnockback(this));
