@@ -120,9 +120,6 @@ public class OCMMain extends JavaPlugin {
 
         //Listeners registered after with same priority appear to be called later
 
-        //Then ModuleSwordBlocking to calculate blocking
-        ModuleLoader.addModule(new ModuleShieldDamageReduction(this));
-
         ModuleLoader.addModule(new ModuleSwordBlocking(this));
         ModuleLoader.addModule(new ModuleGoldenApple(this));
         ModuleLoader.addModule(new ModuleFishingKnockback(this));

@@ -12,7 +12,7 @@ disable-attack-cooldown:
   # This is to disable the attack cooldown
   enabled: true
   # What to set the attack speed to. Default for 1.9 is 4, at least 16 is needed for no cooldown.
-  generic-attack-speed: 24
+  generic-attack-speed: 50
 
 disable-crafting:
   # Disable the crafting of specified items
@@ -30,27 +30,16 @@ disable-enderpearl-cooldown:
 
 sword-blocking:
   # This is to allow players to block with swords again, by getting a shield while they hold right click with a sword
-  enabled: true
+  enabled: false
   # How often, in ticks, OCM should check if the player is still blocking with a shield, and remove it if not
   # If this is too fast the player will have their shield disappear before they're able to block again causing a slight delay
   # If this is too slow players will have a shield in their hand well after they've stopped blocking
   # 20 ticks = 1 second
-  restoreDelay: 20
+  restoreDelay: 10
   # List of items that holding in the offhand while right-clicking with a sword doesn't trigger blocking e.g. bow
   noBlockingItems: []
   # Whether the above list should act as a blacklist (i.e. only items listed stop the blocking mechanic)
   blacklist: true
-
-shield-damage-reduction:
-  # This module allows changing the damage reduction behaviour of shields
-  enabled: true
-  # How much damage blocking should reduce
-  # This can either be a number in half-hearts (e.g 2) or a percentage (e.g. 20%)
-  # 1.8 default: 50%             1.9 default: 33%
-  # Before either is applied the plugin subtracts 1 as that is how it worked in 1.8
-  generalDamageReduction: 50%
-  # This value works the same but is exclusively for projectile damage
-  projectileDamageReduction: 50%
 
 old-golden-apples:
   # This is to change the behaviour / crafting of golden apples to how it was in pre-1.9
@@ -94,7 +83,7 @@ old-fishing-knockback:
   # Credit to HyKurtis for the original code, optimised by Rayzr522
   enabled: true
   # This is the damage done by the fishing rod attack
-  damage: 0.1
+  damage: 0.01
   # Whether the EntityDamageEvent should be used instead of the EntityDamageByEntityEvent
   # Set to true when using plugins like NCP that check range
   useEntityDamageEvent: false
@@ -107,9 +96,9 @@ projectile-knockback:
   enabled: true
   # This is the damage done by each projectile
   damage:
-    snowball: 0.1
-    egg: 0.1
-    ender_pearl: 0.1
+    snowball: 0.01
+    egg: 0.01
+    ender_pearl: 0.01
 
 old-player-regen:
   # This is to make players' regeneration act mostly like it did in pre-1.9

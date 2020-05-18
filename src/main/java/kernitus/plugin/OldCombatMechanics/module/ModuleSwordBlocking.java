@@ -40,7 +40,6 @@ public class ModuleSwordBlocking extends Module {
         noBlockingItems = ConfigUtils.loadMaterialList(module(), "noBlockingItems");
     }
 
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onRightClick(PlayerInteractEvent e) {
         if (e.getItem() == null) return;
@@ -91,6 +90,7 @@ public class ModuleSwordBlocking extends Module {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogout(PlayerQuitEvent e) {
         restore(e.getPlayer());
+        tryCancelTask(e.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -101,9 +101,10 @@ public class ModuleSwordBlocking extends Module {
         UUID id = p.getUniqueId();
 
         e.getDrops().replaceAll(item -> {
-            if (item.getType() == Material.SHIELD)
-                item = storedOffhandItems.remove(id);
-            return item;
+            ItemStack itemStack = item;
+            if (itemStack.getType() == Material.SHIELD)
+                itemStack = storedOffhandItems.remove(id);
+            return itemStack;
         });
 
         // No need for any restore tasks, we've already done that
